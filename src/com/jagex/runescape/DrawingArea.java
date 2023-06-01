@@ -8,6 +8,7 @@ import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBufferInt;
+import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
 import java.util.Hashtable;
 
@@ -291,10 +292,10 @@ public class DrawingArea extends Cacheable {
         graphics.fill(poly);
     }
     
-    private static ColorModel COLOR_MODEL;
+    private static ColorModel COLOR_MODEL = new DirectColorModel(32, 0xff0000, 65280, 255);
 
     public static Graphics2D createGraphics(boolean renderingHints) {
-        Graphics2D g2d = createGraphics(DrawingArea.pixels, DrawingArea.width, DrawingArea.height);
+        Graphics2D g2d = DrawingArea.createGraphics(DrawingArea.pixels, DrawingArea.width, DrawingArea.height);
         if (renderingHints) {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
