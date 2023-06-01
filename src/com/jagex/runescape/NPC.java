@@ -1,5 +1,7 @@
 package com.jagex.runescape;
 
+import java.awt.Polygon;
+
 import com.jagex.runescape.definition.AnimationSequence;
 import com.jagex.runescape.definition.EntityDefinition;
 import com.jagex.runescape.definition.SpotAnimation;
@@ -67,5 +69,9 @@ public final class NPC extends Entity {
     @Override
     public boolean isVisible() {
         return this.npcDefinition != null;
+    }
+    
+    public Polygon getCanvasTilePoly(int size) {
+    	return EntityDefinition.clientInstance.getCanvasTileAreaPoly(new LocalPoint(x, y), size);
     }
 }

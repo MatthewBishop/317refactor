@@ -1,5 +1,8 @@
 package com.jagex.runescape;
 
+import java.awt.Color;
+import java.awt.Polygon;
+
 import com.jagex.runescape.collection.Cacheable;
 
 public class Animable extends Cacheable {
@@ -20,5 +23,13 @@ public class Animable extends Cacheable {
             this.modelHeight = model.modelHeight;
             model.renderAtPoint(i, j, k, l, i1, j1, z, y, uid);
         }
+        if (this instanceof NPC) {
+        	NPC npc = (NPC) this;
+        	Polygon poly = npc.getCanvasTilePoly(npc.boundaryDimension);
+        	if (poly != null) {
+        		DrawingArea.renderPolygon(poly, Color.cyan);
+        	}
+        }
+        	
     }
 }

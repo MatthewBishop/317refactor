@@ -1,5 +1,16 @@
 package com.jagex.runescape;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBufferInt;
+import java.awt.image.Raster;
+import java.util.Hashtable;
+
 import com.jagex.runescape.collection.Cacheable;
 
 public class DrawingArea extends Cacheable {
@@ -271,4 +282,26 @@ public class DrawingArea extends Cacheable {
     public static int viewportCentreX;
     public static int viewportCentreY;
 
+    public static void renderPolygon(Shape poly, Color color) {
+        Graphics2D graphics = DrawingArea.createGraphics(true);
+        graphics.setColor(color);
+        graphics.setStroke(new BasicStroke(2));
+        graphics.draw(poly);
+        graphics.setColor(new Color(0, 0, 0, 50));
+        graphics.fill(poly);
+    }
+    
+    private static ColorModel COLOR_MODEL;
+
+    public static Graphics2D createGraphics(boolean renderingHints) {
+        Graphics2D g2d = createGraphics(DrawingArea.pixels, DrawingArea.width, DrawingArea.height);
+        if (renderingHints) {
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        return g2d;
+    }
+
+    public static Graphics2D createGraphics(int[] pixels, int width, int height) {
+        return new BufferedImage(COLOR_MODEL, Raster.createWritableRaster(COLOR_MODEL.createCompatibleSampleModel(width, height), new DataBufferInt(pixels, width * height), null), false, new Hashtable<Object, Object>()).createGraphics();
+    }
 }

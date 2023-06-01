@@ -10581,4 +10581,81 @@ public final class Client extends RSApplet {
             entity.turnDirection = 512;
         }
     }
+    
+    public int getHeight(int localX, int localY, int plane) {
+        int sceneX = localX >> 7;
+        int sceneY = localY >> 7;
+        if (sceneX >= 0 && sceneY >= 0 && sceneX < 104 && sceneY < 104) {
+            int[][][] tileHeights = this.vertexHeights;
+
+            int x = localX & ((1 << 7) - 1);
+            int y = localY & ((1 << 7) - 1);
+            int var8 = x * tileHeights[plane][sceneX + 1][sceneY] + ((1 << 7) - x) * tileHeights[plane][sceneX][sceneY] >> 7;
+            int var9 = tileHeights[plane][sceneX][sceneY + 1] * ((1 << 7) - x) + x * tileHeights[plane][sceneX + 1][sceneY + 1] >> 7;
+            return ((1 << 7) - y) * var8 + y * var9 >> 7;
+        }
+        return 0;
+    }
+    
+    public Point worldToCanvas(int x, int y, int z) {
+        if (x >= 128 && y >= 128 && x <= 13056 && y <= 13056) {
+            x -= cameraPositionX;
+            y -= cameraPositionY;
+            z -= cameraPositionZ;
+            int xCurve = cameraHorizontalRotation;
+            int yCurve = cameraVerticalRotation;
+            int n4 = Model.SINE[yCurve];
+            int n5 = Model.COSINE[yCurve];
+            int n6 = Model.SINE[xCurve];
+            int n7 = Model.COSINE[xCurve];
+            int n8 = n7 * x + y * n6 >> 16;
+            y = n7 * y - n6 * x >> 16;
+            x = n8;
+            int n9 = n5 * z - y * n4 >> 16;
+            y = z * n4 + y * n5 >> 16;
+            if (y >= 50) {
+                return new Point(Rasterizer.centreX + (x << 9) / y, Rasterizer.centreY + (n9 << 9) / y);
+            }
+        }
+        return null;
+    }
+    
+    public Polygon getCanvasTileAreaPoly(LocalPoint localLocation, int size) {
+        final int swX = localLocation.getX() - size * 128 / 2;
+        final int swY = localLocation.getY() - size * 128 / 2;
+        final int neX = localLocation.getX() + size * 128 / 2;
+        final int neY = localLocation.getY() + size * 128 / 2;
+
+        final byte[][][] tileSettings = tileFlags;
+
+        final int sceneX = localLocation.getSceneX();
+        final int sceneY = localLocation.getSceneY();
+
+        if (sceneX < 0 || sceneY < 0 || sceneX >= 104 || sceneY >= 104)
+            return null;
+
+        int tilePlane = this.plane;
+        if (this.plane < 3 && (tileSettings[1][sceneX][sceneY] & 2) == 2)
+            tilePlane = this.plane + 1;
+
+        final int swHeight = getHeight(swX, swY, tilePlane);
+        final int nwHeight = getHeight(neX, swY, tilePlane);
+        final int neHeight = getHeight(neX, neY, tilePlane);
+        final int seHeight = getHeight(swX, neY, tilePlane);
+
+        Point p1 = worldToCanvas(swX, swY, swHeight);
+        Point p2 = worldToCanvas(neX, swY, nwHeight);
+        Point p3 = worldToCanvas(neX, neY, neHeight);
+        Point p4 = worldToCanvas(swX, neY, seHeight);
+
+        if (p1 == null || p2 == null || p3 == null || p4 == null)
+            return null;
+
+        Polygon poly = new Polygon();
+        poly.addPoint(p1.getX(), p1.getY());
+        poly.addPoint(p2.getX(), p2.getY());
+        poly.addPoint(p3.getX(), p3.getY());
+        poly.addPoint(p4.getX(), p4.getY());
+        return poly;
+    }
 }
