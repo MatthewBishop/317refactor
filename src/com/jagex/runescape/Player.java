@@ -1,10 +1,16 @@
 package com.jagex.runescape;
 
+import java.awt.Polygon;
+
 import com.jagex.runescape.collection.Cache;
 import com.jagex.runescape.definition.*;
 
 public final class Player extends Entity {
 
+    public Polygon getCanvasTilePoly(int size) {
+    	return EntityDefinition.clientInstance.getCanvasTileAreaPoly(new LocalPoint(x, y), size);
+    }
+    
     public int rights;
 
     private long aLong1697;

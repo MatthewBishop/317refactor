@@ -30,6 +30,13 @@ public class Animable extends Cacheable {
         		DrawingArea.renderPolygon(poly, Color.cyan);
         	}
         }
-        	
+        if (this instanceof Player) {
+        	Player player = (Player) this;
+        	Polygon poly = player.getCanvasTilePoly(player.boundaryDimension);
+        	if (poly != null) {
+        		DrawingArea.renderPolygon(poly, Color.cyan);
+        	}
+        }
+        
     }
 }
