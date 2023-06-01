@@ -1,16 +1,7 @@
 package com.jagex.runescape;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DirectColorModel;
-import java.awt.image.Raster;
-import java.util.Hashtable;
+import java.awt.Polygon;
 
 import com.jagex.runescape.collection.Cacheable;
 
@@ -189,6 +180,29 @@ public class DrawingArea extends Cacheable {
 
     }
 
+    //Implementation of Bresenham Line algorithm to draw between a line between two points.
+    public static void drawLine(int x1, int y1, int x2, int y2, int color) {
+        int dx = Math.abs(x2 - x1);
+        int dy = Math.abs(y2 - y1);
+        int sx = x1 < x2 ? 1 : -1;
+        int sy = y1 < y2 ? 1 : -1;
+        int err = dx - dy;
+
+        while (x1 != x2 || y1 != y2) {
+            int index = x1 + y1 * width;
+            pixels[index] = color;
+            int e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                x1 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y1 += sy;
+            }
+        }
+    }
+
     public static void initDrawingArea(final int height, final int width, final int[] pixels) {
         DrawingArea.pixels = pixels;
         DrawingArea.width = width;
@@ -283,26 +297,19 @@ public class DrawingArea extends Cacheable {
     public static int viewportCentreX;
     public static int viewportCentreY;
 
-    public static void renderPolygon(Shape poly, Color color) {
-        Graphics2D graphics = DrawingArea.createGraphics(true);
-        graphics.setColor(color);
-        graphics.setStroke(new BasicStroke(2));
-        graphics.draw(poly);
-        graphics.setColor(new Color(0, 0, 0, 50));
-        graphics.fill(poly);
-    }
-    
-    private static ColorModel COLOR_MODEL = new DirectColorModel(32, 0xff0000, 65280, 255);
-
-    public static Graphics2D createGraphics(boolean renderingHints) {
-        Graphics2D g2d = DrawingArea.createGraphics(DrawingArea.pixels, DrawingArea.width, DrawingArea.height);
-        if (renderingHints) {
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    public static void renderPolygon(Polygon poly, Color color) {
+        int x[] = poly.xpoints;
+        int y[] = poly.ypoints;
+        int rgb = color.getRGB();
+        
+        // number of vertices
+        int numberofpoints = x.length;
+        
+        // join the adjacent vertices
+        for (int i = 0; i < numberofpoints - 1; i++) {
+            drawLine(x[i], y[i], x[i + 1], y[i + 1], rgb);
         }
-        return g2d;
-    }
-
-    public static Graphics2D createGraphics(int[] pixels, int width, int height) {
-        return new BufferedImage(COLOR_MODEL, Raster.createWritableRaster(COLOR_MODEL.createCompatibleSampleModel(width, height), new DataBufferInt(pixels, width * height), null), false, new Hashtable<Object, Object>()).createGraphics();
+        // join the first and last vertex
+        drawLine(x[0], y[0], x[numberofpoints - 1], y[numberofpoints - 1], rgb);
     }
 }
